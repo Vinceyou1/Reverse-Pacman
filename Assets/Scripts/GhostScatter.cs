@@ -7,9 +7,16 @@ public class GhostScatter : GhostBehavior
         ghost.chase.Enable();
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
+        if (ghost.selected) return;
         Node node = other.GetComponent<Node>();
+
+        if (node != null && node.Equals(previousNode))
+        {
+            return;
+        }
+        previousNode = node;
 
         // Do nothing while the ghost is frightened
         if (node != null && enabled && !ghost.frightened.enabled)
@@ -32,5 +39,4 @@ public class GhostScatter : GhostBehavior
             ghost.movement.SetDirection(node.availableDirections[index]);
         }
     }
-
 }

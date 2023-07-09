@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -10,6 +11,8 @@ public class GameManager : MonoBehaviour
     public Text gameOverText;
     public Text scoreText;
     public Text livesText;
+    public Vector2 scroll = Vector2.zero;
+    private int lowscore = int.MaxValue;
 
     public int ghostMultiplier { get; private set; } = 1;
     public int score { get; private set; }
@@ -17,13 +20,47 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        string difficulty = PlayerPrefs.GetString("difficulty");
         NewGame();
+        foreach(Ghost g in ghosts){
+            if (difficulty == "Hard")
+            {
+                g.movement.speed = 6f;
+            }
+            else if (difficulty == "Medium")
+            {
+                g.movement.speed = 7f;
+            }
+            else g.movement.speed = 8f;
+        }
     }
 
     private void Update()
     {
-        if (lives <= 0 && Input.anyKeyDown) {
-            NewGame();
+        if (lives <= 0 && Input.anyKeyDown) { 
+            if(Input.GetKey(KeyCode.Return)){
+                SceneManager.LoadScene("Menu", LoadSceneMode.Single);
+            }
+            else NewGame();
+        }
+        Ghost newGhost = null;
+        foreach (Ghost g in ghosts)
+        {
+            if (Input.GetKey(g.key) && !g.atHome)
+            {
+                newGhost = g; break;
+            }
+        }
+        if (newGhost != null)
+        {
+            foreach (Ghost g in ghosts)
+            {
+                if (g.Equals(newGhost))
+                {
+                    g.selected = true;
+                }
+                else g.selected = false;
+            }
         }
     }
 
@@ -56,6 +93,25 @@ public class GameManager : MonoBehaviour
 
     private void GameOver()
     {
+        if(lives > 0)
+        {
+            lives = 0;
+            gameOverText.text = "You Lose";
+
+        } else
+        {
+            gameOverText.text = "Game Over";
+        }
+        if(score < lowscore)
+        {
+            if(lowscore != int.MaxValue)
+            {
+                gameOverText.text = "Low Score!";
+
+            }
+            lowscore = score;
+        }
+        
         gameOverText.enabled = true;
 
         for (int i = 0; i < ghosts.Length; i++) {
@@ -106,8 +162,11 @@ public class GameManager : MonoBehaviour
 
         if (!HasRemainingPellets())
         {
+            foreach(Ghost g in ghosts) {
+                g.gameObject.SetActive(false);
+            } 
             pacman.gameObject.SetActive(false);
-            Invoke(nameof(NewRound), 3f);
+            Invoke(nameof(GameOver), 3f);
         }
     }
 
@@ -138,5 +197,6 @@ public class GameManager : MonoBehaviour
     {
         ghostMultiplier = 1;
     }
+
 
 }

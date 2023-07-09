@@ -8,7 +8,9 @@ public class GhostHome : GhostBehavior
 
     private void OnEnable()
     {
+        GetComponent<Ghost>().atHome = true;
         StopAllCoroutines();
+        previousNode = null;
     }
 
     private void OnDisable()
@@ -17,6 +19,7 @@ public class GhostHome : GhostBehavior
         if (gameObject.activeInHierarchy) {
             StartCoroutine(ExitTransition());
         }
+        GetComponent<Ghost>().atHome= false;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

@@ -5,6 +5,7 @@ public abstract class GhostBehavior : MonoBehaviour
 {
     public Ghost ghost { get; private set; }
     public float duration;
+    protected Node previousNode;
 
     private void Awake()
     {

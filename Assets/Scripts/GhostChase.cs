@@ -2,15 +2,28 @@ using UnityEngine;
 
 public class GhostChase : GhostBehavior
 {
+    private void OnEnable()
+    {
+        if (PlayerPrefs.GetString("difficulty") == "Hard") {
+            Disable();
+        }
+    }
+
     private void OnDisable()
     {
         ghost.scatter.Enable();
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
+        if (ghost.selected) return;
         Node node = other.GetComponent<Node>();
 
+        if(node != null && node.Equals(previousNode))
+        {
+            return;
+        }
+        previousNode = node;
         // Do nothing while the ghost is frightened
         if (node != null && enabled && !ghost.frightened.enabled)
         {

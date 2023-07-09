@@ -11,6 +11,7 @@ public class GhostFrightened : GhostBehavior
 
     public override void Enable(float duration)
     {
+        ghost.isFrightened = true;
         base.Enable(duration);
 
         body.enabled = false;
@@ -23,6 +24,7 @@ public class GhostFrightened : GhostBehavior
 
     public override void Disable()
     {
+        ghost.isFrightened = false;
         base.Disable();
 
         body.enabled = true;
@@ -35,12 +37,12 @@ public class GhostFrightened : GhostBehavior
     {
         eaten = true;
         ghost.SetPosition(ghost.home.inside.position);
-        ghost.home.Enable(duration);
-
         body.enabled = false;
         eyes.enabled = true;
         blue.enabled = false;
         white.enabled = false;
+        ghost.home.Enable(duration / 8f);
+        Invoke(nameof(Disable), duration / 8f);
     }
 
     private void Flash()
@@ -66,10 +68,16 @@ public class GhostFrightened : GhostBehavior
         eaten = false;
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
+        if (ghost.selected) return;
         Node node = other.GetComponent<Node>();
 
+        if (node != null && node.Equals(previousNode))
+        {
+            return;
+        }
+        previousNode = node;
         if (node != null && enabled)
         {
             Vector2 direction = Vector2.zero;
